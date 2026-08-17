@@ -1,3 +1,4 @@
+import { ChatWidget } from "@/components/site/ChatWidget";
 import { Footer } from "@/components/site/Footer";
 import { Navbar } from "@/components/site/Navbar";
 import { siteConfig, waLink } from "@/config/site";
@@ -24,7 +25,8 @@ export function SiteLayout() {
       </main>
       <Footer />
 
-      {/* Floating WhatsApp button */}
+      {/* Floating AI assistant + WhatsApp buttons */}
+      <ChatWidget />
       <a
         href={waLink()}
         target="_blank"
