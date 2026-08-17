@@ -2,15 +2,17 @@
 
 import { v } from "convex/values";
 import { action } from "./_generated/server";
-import { vly } from "../lib/vly-integrations";
 
 /**
  * AI site assistant — answers visitor questions about Saurav Singh's
  * services, pricing, process and contact details.
  *
- * Uses the project's existing VLY AI integration (see /integrations.md).
- * No external credentials needed; the VLY_INTEGRATION_KEY is injected
- * automatically by the platform.
+ * Calls the OpenAI Chat Completions API directly from this "use node"
+ * action. Requires OPENAI_API_KEY to be set in the project's
+ * Keys/API keys tab (env var name: OPENAI_API_KEY).
+ *
+ * Without the key, the action returns a graceful fallback that points
+ * visitors to WhatsApp/email — the widget never breaks.
  *
  * NOTE: keep this knowledge base in sync with `src/config/site.ts`.
  */
@@ -73,33 +75,49 @@ export const chatWithAssistant = action({
     ),
   },
   handler: async (_ctx, args) => {
+    const apiKey = process.env.OPENAI_API_KEY;
+    if (!apiKey) {
+      return { reply: FALLBACK_REPLY, error: "OPENAI_API_KEY not configured" };
+    }
+
     // Guard against abuse: cap history length and message size.
     const history = args.messages.slice(-MAX_HISTORY).map((m) => ({
       role: m.role,
       content: m.content.slice(0, MAX_MESSAGE_LEN),
     }));
 
-    const messages = [
-      { role: "system" as const, content: SYSTEM_PROMPT },
-      ...history,
-    ];
-
-    if (!process.env.VLY_INTEGRATION_KEY) {
-      return { reply: FALLBACK_REPLY, error: "AI integration key not configured" };
-    }
-
     try {
-      const result = await vly.ai.completion({
-        model: "gpt-4o-mini",
-        messages,
-        temperature: 0.6,
-        maxTokens: 400,
+      const res = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model: "gpt-4o-mini",
+          messages: [{ role: "system", content: SYSTEM_PROMPT }, ...history],
+          temperature: 0.6,
+          max_tokens: 400,
+        }),
       });
 
-      if (result.success && result.data?.choices?.[0]?.message?.content) {
-        return { reply: result.data.choices[0].message.content.trim() };
+      if (!res.ok) {
+        const detail = (await res.text()).slice(0, 200);
+        console.error("OpenAI API error:", res.status, detail);
+        return {
+          reply: FALLBACK_REPLY,
+          error: `OpenAI API responded ${res.status}`,
+        };
       }
-      return { reply: FALLBACK_REPLY, error: result.error ?? "Empty AI response" };
+
+      const data = (await res.json()) as {
+        choices?: { message?: { content?: string } }[];
+      };
+      const reply = data.choices?.[0]?.message?.content?.trim();
+      if (!reply) {
+        return { reply: FALLBACK_REPLY, error: "Empty AI response" };
+      }
+      return { reply };
     } catch (err) {
       console.error("Chat action error:", err);
       return {

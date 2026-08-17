@@ -5,14 +5,15 @@ import { action } from "./_generated/server";
 
 /**
  * Email the site owner about a new inquiry.
- * Requires RESEND_API_KEY (and optionally RESEND_FROM) in env.
+ *
+ * Requires RESEND_API_KEY (and optionally RESEND_FROM) in the project's
+ * Keys/API keys tab. Without the key this action deliberately no-ops
+ * (returns status "skipped") — the inquiry itself is always saved by
+ * `inquiries.submitInquiry`, so the contact form works with zero setup.
  *
  * The inquiry fields are passed in from the client — the inquiry itself is
  * always saved to the `inquiries` table by `inquiries.submitInquiry` first,
  * so this action is purely a notification.
- *
- * This action deliberately no-ops (returns status "skipped") when the
- * Resend key is not configured — the contact form works with zero setup.
  *
  * NOTE: this file intentionally does NOT import `api` from `_generated/api`.
  * Doing so would create a circular type dependency (TS7022), because this
