@@ -520,6 +520,35 @@ export const siteConfig = {
   ] as const,
 
   /* ------------------------------------------------------------------
+   *  TESTIMONIALS
+   *  NOTE: these are SAMPLE testimonials to show the section design —
+   *  replace them with real client feedback before going live.
+   * ------------------------------------------------------------------ */
+  testimonials: [
+    {
+      quote:
+        "Saurav understood exactly what our business needed and delivered a website that finally looks as professional as we do. The WhatsApp integration alone has brought us more inquiries.",
+      name: "Restaurant Owner",
+      role: "Business Website client",
+      initials: "RO",
+    },
+    {
+      quote:
+        "He turned a vague idea into a structured product plan — clear requirements, a proper MVP scope and a roadmap we could actually follow. That's the kind of thinking startups need.",
+      name: "Startup Founder",
+      role: "AI Product Management client",
+      initials: "SF",
+    },
+    {
+      quote:
+        "Our coaching institute website went from outdated to modern, fast and mobile-friendly. Parents now enroll directly through the site. Professional, reliable, easy to work with.",
+      name: "Institute Director",
+      role: "Website Redesign client",
+      initials: "ID",
+    },
+  ] as const,
+
+  /* ------------------------------------------------------------------
    *  VALUE PROPS shown in the home hero
    * ------------------------------------------------------------------ */
   trustPoints: [

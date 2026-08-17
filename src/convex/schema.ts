@@ -43,7 +43,8 @@ const schema = defineSchema(
       description: v.string(),
       preferredContact: v.optional(v.string()),
       status: v.optional(v.string()), // e.g. "new", "contacted", "closed"
-    }),
+      userId: v.optional(v.id("users")), // set when a signed-in user submits
+    }).index("by_user", ["userId"]),
   },
   {
     schemaValidation: false,

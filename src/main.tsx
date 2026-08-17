@@ -14,6 +14,20 @@ const Landing = lazy(() => import("./pages/Landing.tsx"));
 const AuthPage = lazy(() => import("./pages/Auth.tsx"));
 const Dashboard = lazy(() => import("./pages/Dashboard.tsx"));
 const NotFound = lazy(() => import("./pages/NotFound.tsx"));
+const Services = lazy(() => import("./pages/Services.tsx"));
+const Pricing = lazy(() => import("./pages/Pricing.tsx"));
+const Portfolio = lazy(() => import("./pages/Portfolio.tsx"));
+const Process = lazy(() => import("./pages/Process.tsx"));
+const About = lazy(() => import("./pages/About.tsx"));
+const AIPM = lazy(() => import("./pages/AIPM.tsx"));
+const WebDev = lazy(() => import("./pages/WebDev.tsx"));
+const FaqPage = lazy(() => import("./pages/FaqPage.tsx"));
+const Contact = lazy(() => import("./pages/Contact.tsx"));
+const Privacy = lazy(() => import("./pages/Privacy.tsx"));
+const Terms = lazy(() => import("./pages/Terms.tsx"));
+const SiteLayout = lazy(() =>
+  import("./components/site/SiteLayout.tsx").then((m) => ({ default: m.SiteLayout })),
+);
 
 // Simple loading fallback for route transitions
 function RouteLoading() {
@@ -119,11 +133,29 @@ createRoot(document.getElementById("root")!).render(
           <RouteSyncer />
           <Suspense fallback={<RouteLoading />}>
             <Routes>
-              <Route path="/" element={<Landing />} />
+              {/* Public site pages share the site shell */}
+              <Route element={<SiteLayout />}>
+                <Route path="/" element={<Landing />} />
+                <Route path="/services" element={<Services />} />
+                <Route path="/pricing" element={<Pricing />} />
+                <Route path="/portfolio" element={<Portfolio />} />
+                <Route path="/process" element={<Process />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/ai-product-management" element={<AIPM />} />
+                <Route path="/website-development" element={<WebDev />} />
+                <Route path="/faq" element={<FaqPage />} />
+                <Route path="/contact" element={<Contact />} />
+                <Route path="/privacy" element={<Privacy />} />
+                <Route path="/terms" element={<Terms />} />
+              </Route>
+
+              {/* Auth */}
               <Route
                 path="/auth"
                 element={<AuthPage redirectAfterAuth="/dashboard" />}
               />
+
+              {/* Authenticated client hub */}
               <Route
                 path="/dashboard"
                 element={
@@ -132,6 +164,7 @@ createRoot(document.getElementById("root")!).render(
                   </RequireAuth>
                 }
               />
+
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>

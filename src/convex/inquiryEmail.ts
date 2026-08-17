@@ -2,47 +2,54 @@
 
 import { v } from "convex/values";
 import { action } from "./_generated/server";
-import { api } from "./_generated/api";
 
 /**
- * Optional: email the site owner about a new inquiry.
+ * Email the site owner about a new inquiry.
  * Requires RESEND_API_KEY (and optionally RESEND_FROM) in env.
  *
+ * The inquiry fields are passed in from the client — the inquiry itself is
+ * always saved to the `inquiries` table by `inquiries.submitInquiry` first,
+ * so this action is purely a notification.
+ *
  * This action deliberately no-ops (returns status "skipped") when the
- * Resend key is not configured — the inquiry itself is always saved by
- * `inquiries.submitInquiry`, so the contact form works with zero setup.
+ * Resend key is not configured — the contact form works with zero setup.
+ *
+ * NOTE: this file intentionally does NOT import `api` from `_generated/api`.
+ * Doing so would create a circular type dependency (TS7022), because this
+ * file is part of the generated api module map.
  */
 export const sendInquiryEmail = action({
   args: {
     inquiryId: v.id("inquiries"),
     ownerEmail: v.string(),
+    name: v.string(),
+    email: v.string(),
+    phone: v.optional(v.string()),
+    businessName: v.optional(v.string()),
+    projectType: v.string(),
+    budget: v.optional(v.string()),
+    preferredContact: v.optional(v.string()),
+    description: v.string(),
   },
-  handler: async (ctx, args) => {
+  handler: async (_ctx, args) => {
     const apiKey = process.env.RESEND_API_KEY;
     if (!apiKey) {
       return { status: "skipped" as const, reason: "RESEND_API_KEY not configured" };
     }
 
-    const inquiry = await ctx.runQuery(api.inquiries.getInquiry, {
-      id: args.inquiryId,
-    });
-    if (!inquiry) {
-      return { status: "skipped" as const, reason: "inquiry not found" };
-    }
-
     const from = process.env.RESEND_FROM ?? "Saurav Singh <onboarding@resend.dev>";
     const body = [
-      `New project inquiry from ${inquiry.name}`,
+      `New project inquiry from ${args.name}`,
       "",
-      `Project type: ${inquiry.projectType}`,
-      `Budget: ${inquiry.budget ?? "Not specified"}`,
-      `Business: ${inquiry.businessName ?? "Not specified"}`,
-      `Phone: ${inquiry.phone ?? "Not specified"}`,
-      `Preferred contact: ${inquiry.preferredContact ?? "Not specified"}`,
-      `Email: ${inquiry.email}`,
+      `Project type: ${args.projectType}`,
+      `Budget: ${args.budget ?? "Not specified"}`,
+      `Business: ${args.businessName ?? "Not specified"}`,
+      `Phone: ${args.phone ?? "Not specified"}`,
+      `Preferred contact: ${args.preferredContact ?? "Not specified"}`,
+      `Email: ${args.email}`,
       "",
       "Project description:",
-      inquiry.description,
+      args.description,
     ].join("\n");
 
     try {
@@ -55,8 +62,8 @@ export const sendInquiryEmail = action({
         body: JSON.stringify({
           from,
           to: [args.ownerEmail],
-          replyTo: inquiry.email,
-          subject: `New project inquiry — ${inquiry.projectType}`,
+          replyTo: args.email,
+          subject: `New project inquiry — ${args.projectType}`,
           text: body,
         }),
       });

@@ -1,3 +1,4 @@
+import { getAuthUserId } from "@convex-dev/auth/server";
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 
@@ -29,6 +30,7 @@ export const submitInquiry = mutation({
     budget: v.optional(v.string()),
     description: v.string(),
     preferredContact: v.optional(v.string()),
+    userId: v.optional(v.id("users")),
   },
   handler: async (ctx, args) => {
     // Trim + truncate everything server-side; the DB only ever sees clean data.
@@ -54,6 +56,7 @@ export const submitInquiry = mutation({
       description,
       preferredContact: clean(args.preferredContact, 50) || undefined,
       status: "new",
+      userId: args.userId,
     });
 
     return { success: true, id };
@@ -64,6 +67,22 @@ export const getInquiry = query({
   args: { id: v.id("inquiries") },
   handler: async (ctx, args) => {
     return ctx.db.get(args.id);
+  },
+});
+
+/** Inquiries belonging to the signed-in user (used by the client hub). */
+export const getMyInquiries = query({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await getAuthUserId(ctx);
+    if (userId === null) {
+      return null;
+    }
+    return ctx.db
+      .query("inquiries")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .order("desc")
+      .collect();
   },
 });
 
