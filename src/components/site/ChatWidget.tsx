@@ -34,14 +34,13 @@ export function ChatWidget() {
   const chatWithAssistant = useAction(api.chat.chatWithAssistant);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (open && messages.length === 0) setMessages([WELCOME]);
-  }, [open, messages.length]);
+  // Show the welcome message until the visitor sends their first message.
+  const displayMessages = open && messages.length === 0 ? [WELCOME] : messages;
 
   useEffect(() => {
     const el = scrollRef.current;
     if (el) el.scrollTop = el.scrollHeight;
-  }, [messages, sending, open]);
+  }, [displayMessages, sending, open]);
 
   const send = async (text: string) => {
     const content = text.trim();
@@ -113,7 +112,7 @@ export function ChatWidget() {
 
           {/* Messages */}
           <div ref={scrollRef} className="flex-1 space-y-3 overflow-y-auto p-4">
-            {messages.map((m, i) => (
+            {displayMessages.map((m, i) => (
               <div
                 key={i}
                 className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}
@@ -140,7 +139,7 @@ export function ChatWidget() {
           </div>
 
           {/* Quick prompts */}
-          {messages.length <= 1 && !sending && (
+          {messages.length === 0 && !sending && (
             <div className="flex flex-wrap gap-2 border-t border-border/60 px-4 py-3">
               {QUICK_PROMPTS.map((q) => (
                 <button

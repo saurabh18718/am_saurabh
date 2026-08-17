@@ -1,0 +1,1 @@
+import{u as n,j as r,m as a}from"./framer-motion-BqeEwRFv.js";function u({children:e,delay:i=0,className:t}){const o=n();return r.jsx(a.div,{className:t,initial:{opacity:0,y:o?0:24},whileInView:{opacity:1,y:0},viewport:{once:!0,margin:"-80px"},transition:{duration:.55,delay:i,ease:[.21,.47,.32,.98]},children:e})}export{u as R};

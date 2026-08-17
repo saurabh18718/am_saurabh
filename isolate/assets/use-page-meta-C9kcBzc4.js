@@ -1,0 +1,1 @@
+import{s as m}from"./site-BCYIwhc2.js";import{r as n}from"./react-vendor-BsvDnyai.js";function c(t,a){n.useEffect(()=>{if(document.title=t?`${t} — ${m.name}`:m.websiteTitle,a){let e=document.querySelector('meta[name="description"]');e||(e=document.createElement("meta"),e.name="description",document.head.appendChild(e)),e.content=a}},[t,a])}export{c as u};

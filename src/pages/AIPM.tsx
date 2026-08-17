@@ -3,7 +3,6 @@ import { PageHeader } from "@/components/site/PageHeader";
 import { Reveal } from "@/components/site/Reveal";
 import { SectionHeading } from "@/components/site/SectionHeading";
 import { Button } from "@/components/ui/button";
-import { siteConfig } from "@/config/site";
 import { usePageMeta } from "@/hooks/use-page-meta";
 import {
   ArrowRight,
